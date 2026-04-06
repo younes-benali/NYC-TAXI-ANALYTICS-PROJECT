@@ -1,1 +1,4 @@
-data
+data/processed/cleaned_batch*.parquet
+data/processed/model_sample_10pct_complete.parquet
+data/processed/prediction_anomaly_data.parquet
+data/raw
