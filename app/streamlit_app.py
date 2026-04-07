@@ -37,12 +37,12 @@ def load_models():
     """Load all models and scalers."""
     models = {}
     # XGBoost fare model
-    xgb_path = os.path.join(MODELS_DIR, "xgboost_fare_model.pkl")
+    xgb_path = "https://github.com/younes-benali/NYC-TAXI-ANALYTICS-PROJECT/blob/main/Models/xgboost_fare_model.pkl"
     models['xgb'] = joblib.load(xgb_path)
 
     # Isolation Forest anomaly detector
-    iso_path = os.path.join(MODELS_DIR, "isolation_forest_anomaly.pkl")
-    iso_scaler_path = os.path.join(MODELS_DIR, "scaler_anomaly.pkl")
+    iso_path = "https://github.com/younes-benali/NYC-TAXI-ANALYTICS-PROJECT/blob/main/Models/isolation_forest_anomaly.pkl"
+    iso_scaler_path = "https://github.com/younes-benali/NYC-TAXI-ANALYTICS-PROJECT/blob/main/Models/scaler_anomaly.pkl"
     models['iso_forest'] = joblib.load(iso_path)
     models['iso_scaler'] = joblib.load(iso_scaler_path)
 
