@@ -1,4 +1,4 @@
-# dashboard/app.py
+# app/streamlit_app.py
 
 import streamlit as st
 import pandas as pd
@@ -15,13 +15,11 @@ import os
 st.set_page_config(page_title="NYC Taxi Analytics", layout="wide", page_icon="🚕")
 
 # -------------------------------
-# PATH HELPER
+# PATH HELPER – for Streamlit Cloud (repo root is one level above 'app')
 def get_project_root():
-    """Return absolute path to project root (NYC-TAXI-ANALYTICS-PLATFORM)."""
-    # This file is in app/dashboard/app.py
-    current_dir = os.path.dirname(os.path.abspath(__file__))  # .../app/dashboard
-    app_dir = os.path.dirname(current_dir)                   # .../app
-    project_root = os.path.dirname(app_dir)                  # .../NYC-TAXI-ANALYTICS-PLATFORM
+    """Return absolute path to project root (where 'Models' and 'data' folders live)."""
+    current_dir = os.path.dirname(os.path.abspath(__file__))  # .../app
+    project_root = os.path.dirname(current_dir)               # .../NYC-TAXI-ANALYTICS-PROJECT
     return project_root
 
 PROJECT_ROOT = get_project_root()
@@ -34,19 +32,19 @@ DATA_EXTERNAL_DIR = os.path.join(PROJECT_ROOT, "data", "external", "taxi_zones")
 
 @st.cache_resource
 def load_models():
-    """Load all models and scalers."""
+    """Load all models and scalers using local paths (repo is cloned)."""
     models = {}
     # XGBoost fare model
-    xgb_path = "https://github.com/younes-benali/NYC-TAXI-ANALYTICS-PROJECT/blob/main/Models/xgboost_fare_model.pkl"
+    xgb_path = os.path.join(MODELS_DIR, "xgboost_fare_model.pkl")
     models['xgb'] = joblib.load(xgb_path)
 
     # Isolation Forest anomaly detector
-    iso_path = "https://github.com/younes-benali/NYC-TAXI-ANALYTICS-PROJECT/blob/main/Models/isolation_forest_anomaly.pkl"
-    iso_scaler_path = "https://github.com/younes-benali/NYC-TAXI-ANALYTICS-PROJECT/blob/main/Models/scaler_anomaly.pkl"
+    iso_path = os.path.join(MODELS_DIR, "isolation_forest_anomaly.pkl")
+    iso_scaler_path = os.path.join(MODELS_DIR, "scaler_anomaly.pkl")
     models['iso_forest'] = joblib.load(iso_path)
     models['iso_scaler'] = joblib.load(iso_scaler_path)
 
-    # LSTM models for top zones (lowercase 'lstm')
+    # LSTM models for top zones
     top_zones = {
         132: "JFK Airport",
         237: "Upper East Side South",
@@ -82,8 +80,7 @@ def load_zone_lookup():
     return pd.read_csv(zone_path)
 
 # -------------------------------
-# MAIN APP
-
+# MAIN APP (the rest is unchanged)
 def main():
     st.title("🚕 NYC Yellow Taxi Analytics Platform")
     st.markdown("Predict fares, forecast demand, and detect anomalies using machine learning.")
@@ -203,7 +200,6 @@ def main():
 
         model_path = os.path.join(MODELS_DIR, f"lstm_zone_{zone_id}.h5")
         scaler_path = os.path.join(MODELS_DIR, f"scaler_zone_{zone_id}.pkl")
-        # Note: filename is "forcasting_data.parquet" (typo in original)
         demand_data_path = os.path.join(DATA_PROCESSED_DIR, "forcasting_data.parquet")
 
         if os.path.exists(model_path) and os.path.exists(scaler_path):
