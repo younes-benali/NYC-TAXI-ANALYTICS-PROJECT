@@ -92,7 +92,7 @@ def main():
 
     tabs = st.tabs(["📊 Overview", "💰 Fare Predictor", "📈 Demand Forecast", "⚠️ Anomaly Explorer", "🔍 Data Explorer"])
 
-    # ---------- TAB 1: OVERVIEW ----------
+        # ---------- TAB 1: OVERVIEW ----------
     with tabs[0]:
         st.header("Key Statistics")
         col1, col2, col3, col4 = st.columns(4)
@@ -100,6 +100,12 @@ def main():
         col2.metric("Avg Fare", f"${df_sample['fare_amount'].mean():.2f}")
         col3.metric("Avg Tip", f"${df_sample['tip_amount'].mean():.2f}")
         col4.metric("Avg Distance", f"{df_sample['trip_distance'].mean():.1f} mi")
+
+        # Create time-based columns if they don't exist
+        if 'pickup_hour' not in df_sample.columns:
+            df_sample['pickup_hour'] = df_sample['tpep_pickup_datetime'].dt.hour
+        if 'dayofweek' not in df_sample.columns:
+            df_sample['dayofweek'] = df_sample['tpep_pickup_datetime'].dt.dayofweek
 
         st.subheader("Daily Trip Volume (Sample)")
         df_sample['date'] = df_sample['tpep_pickup_datetime'].dt.date
@@ -150,16 +156,14 @@ def main():
                                  template='plotly_dark')
         st.plotly_chart(fig_scatter, use_container_width=True)
 
-        # Optional: Hourly heatmap (day of week vs hour)
+        # Hourly heatmap (day of week vs hour)
         st.subheader("Trip Volume Heatmap (Hour vs Day of Week)")
-        df_sample['dayofweek'] = df_sample['tpep_pickup_datetime'].dt.dayofweek
         day_names = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
         heatmap_data = df_sample.groupby(['dayofweek', 'pickup_hour']).size().unstack(fill_value=0)
         heatmap_data.index = [day_names[i] for i in heatmap_data.index]
         fig_heatmap = px.imshow(heatmap_data, labels=dict(x="Hour of Day", y="Day of Week", color="Trips"),
                                 title="Hourly Trip Volume by Day of Week", template='plotly_dark', aspect="auto")
         st.plotly_chart(fig_heatmap, use_container_width=True)
-
     # ---------- TAB 2: FARE PREDICTOR ----------
     with tabs[1]:
         st.header("Predict Taxi Fare")
