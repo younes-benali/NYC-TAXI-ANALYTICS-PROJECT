@@ -38,7 +38,9 @@ The Streamlit app (deployed on Streamlit Cloud) provides five interactive tabs:
 | **⚠️ Anomaly Explorer** | Enter fare, distance, duration, tip → Isolation Forest classifies the trip as normal / anomalous |
 | **🔍 Data Explorer** | Filter and browse the sample trip data (100k rows) |
 
-All models are pre‑trained and loaded from the `Models/` folder.
+
+<img src="app/streamlit-app.png" width="900">
+
 
 ---
 
