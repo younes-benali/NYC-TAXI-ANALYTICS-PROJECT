@@ -114,32 +114,7 @@ def main():
         fig = px.bar(top_zones, x='Zone', y='count', title="Trip Count by Pickup Zone")
         st.plotly_chart(fig, use_container_width=True)
      # Additional visualizations for Overview tab
-        
-        st.subheader("Fare Distribution")
-        fig_fare = px.histogram(df_sample, x='fare_amount', nbins=50, title="Trip Fares",
-                                labels={'fare_amount': 'Fare ($)'}, template='plotly_dark')
-        st.plotly_chart(fig_fare, use_container_width=True)
-        
-        col_left, col_right = st.columns(2)
-        with col_left:
-            st.subheader("Trips by Hour")
-            hourly = df_sample.groupby('pickup_hour').size().reset_index(name='count')
-            fig_hour = px.bar(hourly, x='pickup_hour', y='count', title="Hourly Trip Volume",
-                              labels={'pickup_hour': 'Hour', 'count': 'Trips'}, template='plotly_dark')
-            st.plotly_chart(fig_hour, use_container_width=True)
-        
-        with col_right:
-            st.subheader("Payment Type")
-            payment_counts = df_sample['payment_type'].map({1:'Credit',2:'Cash',3:'No charge',4:'Dispute',5:'Unknown'}).value_counts()
-            fig_payment = px.pie(values=payment_counts.values, names=payment_counts.index, title="Payment Type Share", template='plotly_dark')
-            st.plotly_chart(fig_payment, use_container_width=True)
-        
-        st.subheader("Trip Distance vs Fare")
-        scatter_df = df_sample.sample(min(5000, len(df_sample)), random_state=42)
-        fig_scatter = px.scatter(scatter_df, x='trip_distance', y='fare_amount', opacity=0.5,
-                                 title="Distance vs Fare", labels={'trip_distance': 'Distance (mi)', 'fare_amount': 'Fare ($)'},
-                                 template='plotly_dark')
-        st.plotly_chart(fig_scatter, use_container_width=True)
+     
     # ---------- TAB 2: FARE PREDICTOR ----------
     with tabs[1]:
         st.header("Predict Taxi Fare")
