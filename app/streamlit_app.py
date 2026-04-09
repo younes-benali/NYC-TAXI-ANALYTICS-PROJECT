@@ -80,7 +80,7 @@ def load_zone_lookup():
     return pd.read_csv(zone_path)
 
 # -------------------------------
-# MAIN APP (the rest is unchanged)
+# MAIN APP
 def main():
     st.title("🚕 NYC Yellow Taxi Analytics Platform")
     st.markdown("Predict fares, forecast demand, and detect anomalies using machine learning.")
@@ -113,8 +113,53 @@ def main():
         top_zones = top_zones.nlargest(10, 'count')
         fig = px.bar(top_zones, x='Zone', y='count', title="Trip Count by Pickup Zone")
         st.plotly_chart(fig, use_container_width=True)
-     # Additional visualizations for Overview tab
-     
+
+        # ----- Additional Visualizations -----
+        st.subheader("Fare Distribution")
+        fig_fare = px.histogram(df_sample, x='fare_amount', nbins=50, title="Distribution of Fare Amounts",
+                                labels={'fare_amount': 'Fare ($)'}, template='plotly_dark')
+        st.plotly_chart(fig_fare, use_container_width=True)
+
+        col_left, col_mid, col_right = st.columns(3)
+        with col_left:
+            st.subheader("Trips by Hour")
+            hourly = df_sample.groupby('pickup_hour').size().reset_index(name='count')
+            fig_hour = px.bar(hourly, x='pickup_hour', y='count', title="Hourly Trip Volume",
+                              labels={'pickup_hour': 'Hour', 'count': 'Trips'}, template='plotly_dark')
+            st.plotly_chart(fig_hour, use_container_width=True)
+
+        with col_mid:
+            st.subheader("Payment Type")
+            payment_counts = df_sample['payment_type'].map({1:'Credit',2:'Cash',3:'No charge',4:'Dispute',5:'Unknown'}).value_counts()
+            fig_payment = px.pie(values=payment_counts.values, names=payment_counts.index, title="Payment Type Share", template='plotly_dark')
+            st.plotly_chart(fig_payment, use_container_width=True)
+
+        with col_right:
+            st.subheader("Tip Percentage Distribution")
+            # Compute tip percentage (avoid division by zero)
+            tip_pct = (df_sample['tip_amount'] / df_sample['fare_amount']) * 100
+            tip_pct = tip_pct.replace([np.inf, -np.inf], np.nan).dropna()
+            fig_tip = px.histogram(x=tip_pct, nbins=40, title="Tip % of Fare",
+                                   labels={'x': 'Tip (%)'}, template='plotly_dark')
+            st.plotly_chart(fig_tip, use_container_width=True)
+
+        st.subheader("Trip Distance vs Fare")
+        scatter_df = df_sample.sample(min(5000, len(df_sample)), random_state=42)
+        fig_scatter = px.scatter(scatter_df, x='trip_distance', y='fare_amount', opacity=0.5,
+                                 title="Distance vs Fare", labels={'trip_distance': 'Distance (mi)', 'fare_amount': 'Fare ($)'},
+                                 template='plotly_dark')
+        st.plotly_chart(fig_scatter, use_container_width=True)
+
+        # Optional: Hourly heatmap (day of week vs hour)
+        st.subheader("Trip Volume Heatmap (Hour vs Day of Week)")
+        df_sample['dayofweek'] = df_sample['tpep_pickup_datetime'].dt.dayofweek
+        day_names = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+        heatmap_data = df_sample.groupby(['dayofweek', 'pickup_hour']).size().unstack(fill_value=0)
+        heatmap_data.index = [day_names[i] for i in heatmap_data.index]
+        fig_heatmap = px.imshow(heatmap_data, labels=dict(x="Hour of Day", y="Day of Week", color="Trips"),
+                                title="Hourly Trip Volume by Day of Week", template='plotly_dark', aspect="auto")
+        st.plotly_chart(fig_heatmap, use_container_width=True)
+
     # ---------- TAB 2: FARE PREDICTOR ----------
     with tabs[1]:
         st.header("Predict Taxi Fare")
